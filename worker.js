@@ -64,3 +64,79 @@ OPSTRAINER:
 - ReliefWeb job matching integration
 - Website: opstrainer.co.za
 `;
+```javascript
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/chat") {
+      try {
+        const { message } = await request.json();
+
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": env.ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 500,
+            system: "You are a professional assistant representing Mark Fulton. Answer questions exclusively based on his CV and background provided below. Be concise and professional. If asked something not in the CV, say you can only answer questions about Mark's professional background.\n\n" + CV_CONTEXT,
+            messages: [{ role: "user", content: message }],
+          }),
+        });
+
+        const data = await response.json();
+        const reply = data.content?.[0]?.text || "Sorry, I could not generate a response.";
+
+        return new Response(JSON.stringify({ reply }), {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        });
+
+      } catch (err) {
+        return new Response(JSON.stringify({ reply: "Something went wrong. Please try again." }), {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        });
+      }
+    }
+
+    if (url.pathname === "/" || url.pathname === "") {
+      const indexRequest = new Request(new URL("/index.html", url.origin), request);
+      return env.ASSETS.fetch(indexRequest);
+    }
+
+    return env.ASSETS.fetch(request);
+  },
+};
+```
+
+Commit the file, then also update `wrangler.toml` by editing it directly in GitHub — select all and retype this:
+
+```
+name = "markfultonportfolio"
+main = "worker.js"
+compatibility_date = "2025-09-27"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "."
+binding = "ASSETS"
