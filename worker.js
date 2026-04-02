@@ -63,8 +63,7 @@ OPSTRAINER:
 - British Red Cross content partnership
 - ReliefWeb job matching integration
 - Website: opstrainer.co.za
-`;
-```javascript
+`
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
