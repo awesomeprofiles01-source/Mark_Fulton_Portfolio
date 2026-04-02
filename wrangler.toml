@@ -1,0 +1,10 @@
+name = "markfultonportfolio"
+main = "worker.js"
+compatibility_date = "2025-09-27"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+
+[assets]
+directory = "."
+binding = "ASSETS"
