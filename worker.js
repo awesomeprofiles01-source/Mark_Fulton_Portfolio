@@ -127,16 +127,3 @@ export default {
     return env.ASSETS.fetch(request);
   },
 };
-```
-
-Commit the file, then also update `wrangler.toml` by editing it directly in GitHub — select all and retype this:
-
-```
-name = "markfultonportfolio"
-main = "worker.js"
-compatibility_date = "2025-09-27"
-compatibility_flags = ["nodejs_compat"]
-
-[assets]
-directory = "."
-binding = "ASSETS"
